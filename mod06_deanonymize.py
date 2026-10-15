@@ -10,20 +10,15 @@ def load_data(anonymized_path, auxiliary_path):
 
 
 def link_records(anon_df, aux_df):
-    """
-    Attempt to link anonymized records to auxiliary records
-    using exact matching on quasi-identifiers.
-
-    Returns a DataFrame with columns:
-      anon_id, matched_name
-    containing ONLY uniquely matched records.
-    """
-    raise NotImplementedError
+    merged = pd.merge(anon_df, aux_df, on=["age", "gender", "zip3"])
+    counts = merged["anon_id"].value_counts()
+    unique_ids = counts[counts == 1].index
+    unique_matches = merged[merged["anon_id"].isin(unique_ids)]
+    result = unique_matches[["anon_id", "name"]]
+    result = result.rename(columns={"name": "matched_name"})
+    return result
 
 
 def deanonymization_rate(matches_df, anon_df):
-    """
-    Compute the fraction of anonymized records
-    that were uniquely re-identified.
-    """
-    raise NotImplementedError
+    return len(matches_df) / len(anon_df)
+ 
